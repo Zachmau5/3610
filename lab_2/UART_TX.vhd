@@ -64,7 +64,12 @@ begin
                     state_tx <= load_data;    -- Move to 'load_data' state to begin transmission
                 end if;
             end if;
-            prev_load <= load;  -- Update 'prev_load' with the current 'load' for edge detection in the next clock cycle
+                prev_load <= load;-- IMPORTANT P, THIS ELIMINATES CONTINOUS TX
+            --	Every clock cycle, the current value of load is stored in prev_load.
+            -- This allows the system to compare the current value of load with its value from the previous clock cycle
+            -- This comparison checks whether load has transitioned from 0 (low) in the previous clock cycle to 1 (high) in the current clock cycle. 
+            -- If so, this indicates a rising edge, and the system transitions to the load_data state to start transmission.
+	        -- If the load signal is high but did not transition from low (i.e., if prev_load is also 1), the system does not initiate another transmission    
         
             -- State machine handling
             case state_tx is
