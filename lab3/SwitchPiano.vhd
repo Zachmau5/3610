@@ -15,86 +15,188 @@ end SwitchPiano;
 
 architecture Behavioral of SwitchPiano is
 
-    signal clk_divider : integer := 0;
-    signal clk_counter : integer := 0;
-    signal tone : std_logic := '0';
-    signal song_index : integer := 0;
-    signal song_counter : integer := 0;
-    signal song_playing : std_logic := '0';
+    -- Signals for each note's frequency divider and tone generation
+    signal clk_divider_C, clk_divider_D, clk_divider_E, clk_divider_F : integer := 0;
+    signal clk_divider_G, clk_divider_A, clk_divider_B, clk_divider_HighC : integer := 0;
+
+    signal clk_counter_C, clk_counter_D, clk_counter_E, clk_counter_F : integer := 0;
+    signal clk_counter_G, clk_counter_A, clk_counter_B, clk_counter_HighC : integer := 0;
+
+    signal tone_C, tone_D, tone_E, tone_F : std_logic := '0';
+    signal tone_G, tone_A, tone_B, tone_HighC : std_logic := '0';
+    signal tone_out : std_logic := '0';  -- Output tone, result of combined frequencies
 
     -- Frequency constants for each tone (based on system clock of 100 MHz)
-    constant C_FREQ : integer := 38223;  -- 100MHz / (2 * 261.63 Hz)
-    constant D_FREQ : integer := 34129;  -- 100MHz / (2 * 293.66 Hz)
-    constant E_FREQ : integer := 30303;  -- 100MHz / (2 * 329.63 Hz)
-    constant F_FREQ : integer := 28635;  -- 100MHz / (2 * 349.23 Hz)
-    constant G_FREQ : integer := 25510;  -- 100MHz / (2 * 392 Hz)
-    constant A_FREQ : integer := 22727;  -- 100MHz / (2 * 440 Hz)
-    constant B_FREQ : integer := 20248;  -- 100MHz / (2 * 493.88 Hz)
+    constant C_FREQ      : integer := 38223;  -- 100MHz / (2 * 261.63 Hz)
+    constant D_FREQ      : integer := 34129;  -- 100MHz / (2 * 293.66 Hz)
+    constant E_FREQ      : integer := 30303;  -- 100MHz / (2 * 329.63 Hz)
+    constant F_FREQ      : integer := 28635;  -- 100MHz / (2 * 349.23 Hz)
+    constant G_FREQ      : integer := 25510;  -- 100MHz / (2 * 392 Hz)
+    constant A_FREQ      : integer := 22727;  -- 100MHz / (2 * 440 Hz)
+    constant B_FREQ      : integer := 20248;  -- 100MHz / (2 * 493.88 Hz)
     constant HIGH_C_FREQ : integer := 19111;  -- 100MHz / (2 * 523.25 Hz)
-
-    -- Song definition: A sequence of notes (frequencies) and their durations
-    type song_t is array (0 to 7) of integer;
-    constant song_notes : song_t := (C_FREQ, D_FREQ, E_FREQ, F_FREQ, G_FREQ, A_FREQ, B_FREQ, HIGH_C_FREQ);
-    constant song_durations : song_t := (10000000, 10000000, 10000000, 10000000, 10000000, 10000000, 10000000, 10000000);  -- Duration of each note
 
 begin
     process(Clk)
     begin
         if rising_edge(Clk) then
-            -- Detect if switch combination "00000011" is pressed
-            if switch = "00000011" then
-                -- If song is not already playing, reset song index and counter
-                if song_playing = '0' then
-                    song_index <= 0;  -- Reset song to the beginning
-                    song_counter <= 0;
-                    song_playing <= '1';  -- Set flag to indicate song is playing
-                end if;
-                
-                -- Play the song by stepping through the notes
-                if song_counter = 0 then
-                    -- Move to the next note in the song
-                    clk_divider <= song_notes(song_index);
-                    song_counter <= song_durations(song_index);
-                    song_index <= (song_index + 1) mod 8;  -- Loop back to the beginning of the song
-                else
-                    song_counter <= song_counter - 1;
-                end if;
-            else
-                -- If no song is playing, play individual tones based on switch input
-                song_playing <= '0';  -- Reset the song flag when switches are released
 
-                -- Select the appropriate frequency based on the active switch
-                case switch is
-                    when "00000001" => clk_divider <= C_FREQ;
-                    when "00000010" => clk_divider <= D_FREQ;
-                    when "00000100" => clk_divider <= E_FREQ;
-                    when "00001000" => clk_divider <= F_FREQ;
-                    when "00010000" => clk_divider <= G_FREQ;
-                    when "00100000" => clk_divider <= A_FREQ;
-                    when "01000000" => clk_divider <= B_FREQ;
-                    when "10000000" => clk_divider <= HIGH_C_FREQ;
-                    when others      => clk_divider <= 0;
-                end case;
+            -- Handle chord generation based on switch input for all notes
+            -- Assign each switch to a frequency divider for the corresponding note
+            if switch(0) = '1' then
+                clk_divider_C <= C_FREQ;
+            else
+                clk_divider_C <= 0;
             end if;
 
-            -- Generate the tone if a switch is active or a song is playing
-            if clk_divider > 0 then
-                if clk_counter = 0 then
-                    clk_counter <= clk_divider;
-                    tone <= not tone;  -- Toggle the tone signal
+            if switch(1) = '1' then
+                clk_divider_D <= D_FREQ;
+            else
+                clk_divider_D <= 0;
+            end if;
+
+            if switch(2) = '1' then
+                clk_divider_E <= E_FREQ;
+            else
+                clk_divider_E <= 0;
+            end if;
+
+            if switch(3) = '1' then
+                clk_divider_F <= F_FREQ;
+            else
+                clk_divider_F <= 0;
+            end if;
+
+            if switch(4) = '1' then
+                clk_divider_G <= G_FREQ;
+            else
+                clk_divider_G <= 0;
+            end if;
+
+            if switch(5) = '1' then
+                clk_divider_A <= A_FREQ;
+            else
+                clk_divider_A <= 0;
+            end if;
+
+            if switch(6) = '1' then
+                clk_divider_B <= B_FREQ;
+            else
+                clk_divider_B <= 0;
+            end if;
+
+            if switch(7) = '1' then
+                clk_divider_HighC <= HIGH_C_FREQ;
+            else
+                clk_divider_HighC <= 0;
+            end if;
+
+            -- Tone generation for each note
+            -- Tone generation for C
+            if clk_divider_C > 0 then
+                if clk_counter_C = 0 then
+                    clk_counter_C <= clk_divider_C;
+                    tone_C <= not tone_C;  -- Toggle the tone signal
                 else
-                    clk_counter <= clk_counter - 1;
+                    clk_counter_C <= clk_counter_C - 1;
                 end if;
             else
-                tone <= '0';  -- No tone if no switch is pressed
+                tone_C <= '0';  -- No tone if not selected
             end if;
+
+            -- Tone generation for D
+            if clk_divider_D > 0 then
+                if clk_counter_D = 0 then
+                    clk_counter_D <= clk_divider_D;
+                    tone_D <= not tone_D;  -- Toggle the tone signal
+                else
+                    clk_counter_D <= clk_counter_D - 1;
+                end if;
+            else
+                tone_D <= '0';  -- No tone if not selected
+            end if;
+
+            -- Tone generation for E
+            if clk_divider_E > 0 then
+                if clk_counter_E = 0 then
+                    clk_counter_E <= clk_divider_E;
+                    tone_E <= not tone_E;  -- Toggle the tone signal
+                else
+                    clk_counter_E <= clk_counter_E - 1;
+                end if;
+            else
+                tone_E <= '0';  -- No tone if not selected
+            end if;
+
+            -- Tone generation for F
+            if clk_divider_F > 0 then
+                if clk_counter_F = 0 then
+                    clk_counter_F <= clk_divider_F;
+                    tone_F <= not tone_F;  -- Toggle the tone signal
+                else
+                    clk_counter_F <= clk_counter_F - 1;
+                end if;
+            else
+                tone_F <= '0';  -- No tone if not selected
+            end if;
+
+            -- Tone generation for G
+            if clk_divider_G > 0 then
+                if clk_counter_G = 0 then
+                    clk_counter_G <= clk_divider_G;
+                    tone_G <= not tone_G;  -- Toggle the tone signal
+                else
+                    clk_counter_G <= clk_counter_G - 1;
+                end if;
+            else
+                tone_G <= '0';  -- No tone if not selected
+            end if;
+
+            -- Tone generation for A
+            if clk_divider_A > 0 then
+                if clk_counter_A = 0 then
+                    clk_counter_A <= clk_divider_A;
+                    tone_A <= not tone_A;  -- Toggle the tone signal
+                else
+                    clk_counter_A <= clk_counter_A - 1;
+                end if;
+            else
+                tone_A <= '0';  -- No tone if not selected
+            end if;
+
+            -- Tone generation for B
+            if clk_divider_B > 0 then
+                if clk_counter_B = 0 then
+                    clk_counter_B <= clk_divider_B;
+                    tone_B <= not tone_B;  -- Toggle the tone signal
+                else
+                    clk_counter_B <= clk_counter_B - 1;
+                end if;
+            else
+                tone_B <= '0';  -- No tone if not selected
+            end if;
+
+            -- Tone generation for High C
+            if clk_divider_HighC > 0 then
+                if clk_counter_HighC = 0 then
+                    clk_counter_HighC <= clk_divider_HighC;
+                    tone_HighC <= not tone_HighC;  -- Toggle the tone signal
+                else
+                    clk_counter_HighC <= clk_counter_HighC - 1;
+                end if;
+            else
+                tone_HighC <= '0';  -- No tone if not selected
+            end if;
+
+            -- Combine tones to form chord (OR operation can be used)
+            tone_out <= tone_C or tone_D or tone_E or tone_F or tone_G or tone_A or tone_B or tone_HighC;
         end if;
     end process;
 
-    -- Send the tone to freq output
-    freq <= tone;
+    -- Send the combined tone (chord) to freq output
+    freq <= tone_out;
 
-    -- Map the switches to the LEDs
+    -- Map the switches to the LEDs to show active switches
     LED <= switch;
 
     -- Set gain and shutdown for Pmod AMP2
