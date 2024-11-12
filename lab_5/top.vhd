@@ -95,6 +95,69 @@ architecture Behavioral of top is
     end component;
 
 begin
+    -- Mode Display Logic with reset handling
+--    process(rst, mode_select)
+--    begin
+--        if rst = '1' then
+--            an <= "1111";  -- Disable all segments on reset
+--            cat <= "1111111";
+--        else
+--            case mode_select is
+--                when "001" => 
+--                    an <= "0111";
+--                    cat <= MODE_A_DISPLAY; 
+--                when "010" => 
+--                    an <= "0111";
+--                    cat <= MODE_B_DISPLAY;
+--                when "100" => 
+--                    an <= "0111";
+--                    cat <= MODE_C_DISPLAY;
+--                when others => 
+--                    an <= "1111";
+--                    cat <= "1111111";
+--            end case;
+--        end if;
+--    end process;
+
+--    -- Conditional enable for BRAM based on mode and reset
+--    process(clk)
+--    begin
+--        if rising_edge(clk) then
+--            if rst = '1' then
+--                ena_s <= '0';  -- Disable BRAM on reset
+--            elsif mode_select = "010" then
+--                ena_s <= '1';  -- Enable BRAM in Mode B
+--            else
+--                ena_s <= '0';  -- Disable BRAM in other modes
+--            end if;
+--        end if;
+--    end process;
+
+
+--    process(mode_select, switch, note_select)
+--    begin
+--        case mode_select is
+--            when "001" => 
+--                mapped_note <= switch;  -- Use switches directly in Mode A
+                
+--            when "010" =>
+--                -- Map note_select (from BRAM) to mapped_note in Mode B
+--                case note_select is
+--                    when "0001" => mapped_note <= "00000001";  -- C note
+--                    when "0010" => mapped_note <= "00000010";  -- D note
+--                    when "0011" => mapped_note <= "00000100";  -- E note
+--                    when "0100" => mapped_note <= "00001000";  -- F note
+--                    when "0101" => mapped_note <= "00010000";  -- G note
+--                    when "0110" => mapped_note <= "00100000";  -- A note
+--                    when "0111" => mapped_note <= "01000000";  -- B note
+--                    when "1000" => mapped_note <= "10000000";  -- C' note
+--                    when others => mapped_note <= "00000000";  -- Default or unused value
+--                end case;
+                
+--            when others => 
+--                mapped_note <= (others => '0');  -- Default value for invalid modes
+--        end case;
+--    end process;
     -- Combined process to handle mode display, BRAM enable, and note mapping
     process(clk, rst, mode_select, switch, note_select)
     begin
