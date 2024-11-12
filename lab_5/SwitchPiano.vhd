@@ -134,6 +134,37 @@ begin
             end if;
         end if;
     end process;
+                    
+--                        -- Set display for active note from BRAM using note_select
+--                        if note_select /= "0000" then  -- Check if note_select is valid
+--                            an <= "1110"; 
+--                            cat <= DISPLAY_PATTERNS(to_integer(unsigned(note_select)));  -- Display pattern for BRAM note
+--                            LED <= (others => '0');  
+--                            LED(to_integer(unsigned(note_select))) <= '1';  -- Light corresponding LED based on BRAM note
+                        
+--                            -- Frequency toggling for BRAM-selected note
+--                            if count = NOTE_FREQS(to_integer(unsigned(note_select))) then
+--                                freq_reg <= not freq_reg;  -- Toggle frequency output
+--                                count <= 0;
+--                            else
+--                                count <= count + 1;
+--                            end if;
+--                        else
+--                            -- Reset display if no note selected
+--                            LED <= (others => '0');
+--                            cat <= "1111111";
+--                            freq_reg <= '0';
+--                        end if;
+                    -- Other modes: clear outputs
+--                    when others =>
+--                        LED <= (others => '0');
+--                        tone_out <= '0';
+--                        an <= "1111";
+----                        cat <= "1111111";
+--            end if;
+--        end if;
+--    end process;
+
     -- Output signals
     freq <= tone_out;  -- Frequency output for chords in Mode A
     gain <= '1';
